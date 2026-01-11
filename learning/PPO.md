@@ -24,7 +24,7 @@ Mapping PPO concepts to LLMs:
 **trajectory**
 
 A trajectory is an ordered sequence produced by interacting with the environment using a policy:
-$\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots, s_T)$
+$$\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots, s_T)$$
 
 ### principles
 
