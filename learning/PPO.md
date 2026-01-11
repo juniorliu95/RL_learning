@@ -24,26 +24,18 @@ Mapping PPO concepts to LLMs:
 **trajectory**
 
 A trajectory is an ordered sequence produced by interacting with the environment using a policy:
-
-$$\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots, s_T)$$
+$\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots, s_T)$
 
 ### principles
 
 **policy**
-
-$$
-J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \left[ \sum_{t=0}^{T} \gamma^t r_t \right]
-
-$$
-
+$J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \left[ \sum_{t=0}^{T} \gamma^t r_t \right]$
 $\gamma\in{(0,1]}$ is the discount factor
 
 **Policy Gradient (the core idea)**
-
-$$
+$
 \nabla_\theta J(\theta) = \mathbb{E} \left[ \nabla_\theta \log \pi_\theta(a_t \mid s_t) \cdot Q^\pi(s_t, a_t) \right]
-
-$$
+$
 
 where:
 
@@ -55,43 +47,23 @@ aim: Increase the probability of actions that lead to higher future reward.
 why: Using Q directly is noisy.
 
 So we subtract a baseline:
-
-$$
-A^\pi(s, a) = Q^\pi(s, a) - V^\pi(s)
-
-$$
+$A^\pi(s, a) = Q^\pi(s, a) - V^\pi(s)$
 
 Where: $V^\pi(s) = \mathbb{E}[Q^\pi(s, a)]$
 
 Updated gradient:
-
-$$
-\nabla_\theta J(\theta) = \mathbb{E} \left[ \nabla_\theta \log \pi_\theta(a_t \mid s_t) \cdot A_t \right]
-
-$$
+$\nabla_\theta J(\theta) = \mathbb{E} \left[ \nabla_\theta \log \pi_\theta(a_t \mid s_t) \cdot A_t \right]$
 
 **Importance sampling ratio (key PPO idea)**
 
 We collect data using an old policy:
-
-$$
-\pi_{\theta_{\text{old}}}
-
-$$
+$\pi_{\theta_{\text{old}}}$
 
 But we update a new policy:
-
-$$
-\pi_\theta
-
-$$
+$\pi_\theta$
 
 To reuse old data, we define the importance sampling ratio:
-
-$$
-r_t(\theta) = \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{\text{old}}}(a_t \mid s_t)}
-
-$$
+$r_t(\theta) = \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{\text{old}}}(a_t \mid s_t)}$
 
 Where:
 
@@ -108,11 +80,7 @@ Where:
 ---
 
 ### 6. PPO’s unclipped objective (what we would like)
-
-$$
-L_{PG}(\theta) = \mathbb{E}\left[ r_t(\theta) \cdot A_t \right]
-
-$$
+$L_{PG}(\theta) = \mathbb{E}\left[ r_t(\theta) \cdot A_t \right]$
 
 But this allows:
 
@@ -124,11 +92,7 @@ But this allows:
 #### 7. PPO’s clipped surrogate objective
 
 This is PPO.
-
-$$
-L_{CLIP}(\theta) = \mathbb{E}\left[\min \left( r_t(\theta)A_t,\ \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)A_t \right)\right]
-
-$$
+$L_{CLIP}(\theta) = \mathbb{E}\left[\min \left( r_t(\theta)A_t,\ \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)A_t \right)\right]$
 
 **Every variable explained:**
 
@@ -136,7 +100,7 @@ $$
 - $A_t$: advantage at time $t$ ($A_t = Q(s_t, a_t) - V(s_t)$, usually estimated via GAE)
 - $\epsilon$: small constant (e.g., 0.2), defining how far the policy can change.
 - $\text{clip}(x, 1-\epsilon, 1+\epsilon)$:
-  $$
+  $
   \text{clip}(x, 1-\epsilon, 1+\epsilon) = 
   \begin{cases}
       1 - \epsilon & \text{if } x < 1 - \epsilon \\
@@ -144,16 +108,13 @@ $$
       1 + \epsilon & \text{if } x > 1 + \epsilon
   \end{cases}
 
-  $$
+  $
 
 
 #### 8. Value function loss (critic)
 
 We also train a value function:
-
-$$
-L_V(\theta) = \mathbb{E} \left[ \left( V_\theta(s_t) - R_t \right)^2 \right]
-$$
+$L_V(\theta) = \mathbb{E} \left[ \left( V_\theta(s_t) - R_t \right)^2 \right]$
 
 Where:
 
@@ -167,10 +128,7 @@ we want to train the critic model to represent the expected future reward, so tr
 #### 9. Entropy bonus (exploration)
 
 Encourages exploration:
-
-$$
-L_{ENT}(\theta) = \mathbb{E}\left[ H(\pi_\theta(\cdot \mid s_t)) \right]
-$$
+$L_{ENT}(\theta) = \mathbb{E}\left[ H(\pi_\theta(\cdot \mid s_t)) \right]$
 
 * Encourages exploration / diversity
 * Depends only on the policy distribution
@@ -181,10 +139,7 @@ $$
 #### 10. Final PPO objective
 
 These terms are combined in the final PPO objective (the one we maximize):
-
-$$
-L_{PPO}(\theta) = L_{CLIP}(\theta) - c_1 L_V(\theta) + c_2 L_{ENT}(\theta)
-$$
+$L_{PPO}(\theta) = L_{CLIP}(\theta) - c_1 L_V(\theta) + c_2 L_{ENT}(\theta)$
 
 Where:
 
