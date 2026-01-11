@@ -174,9 +174,7 @@ Each stage initializes the next.
 - PPO is *not* good at learning language from scratch.
 
 **Formally:**  
-$$
-\pi_{\theta_0} = \pi_{\mathrm{SFT}}
-$$
+$$\pi_{\theta_0} = \pi_{\mathrm{SFT}}$$
 
 ---
 
@@ -184,9 +182,7 @@ $$
 
 - A frozen copy of the SFT model is created:
 
-$$
-\pi_\text{ref} = \mathrm{stop\_grad}(\pi_\text{SFT})
-$$
+$$\pi_\text{ref} = \mathrm{stop\_grad}(\pi_\text{SFT})$$
 
 **Purpose:**
 - KL penalty anchor
@@ -226,9 +222,7 @@ Two common strategies:
   \((x, y_1, y_2, label)\)
 
 **Objective:**  
-$$
-\log \sigma(r(y_1) - r(y_2))
-$$
+$$\log \sigma(r(y_1) - r(y_2))$$
 
 After training:
 - Reward model is fixed
@@ -320,18 +314,14 @@ PPO stability comes from multiple independent constraints:
 ### 5.1 PPO Clipping
 
 - Limits:
-  $$
-  \frac{\pi_\text{new}}{\pi_\text{old}} \in [1 - \epsilon, 1 + \epsilon]
-  $$
+  $$\frac{\pi_\text{new}}{\pi_\text{old}} \in [1 - \epsilon, 1 + \epsilon]$$
 - Prevents huge policy jumps
 
 ---
 
 ### 5.2 KL Penalty vs Reference Model
 
-- $$
-  L_{\text{KL}} = \beta \cdot \mathrm{KL}(\pi_\theta \parallel \pi_\text{ref})
-  $$
+- $$L_{\text{KL}} = \beta \cdot \mathrm{KL}(\pi_\theta \parallel \pi_\text{ref})$$
 - Prevents drift away from SFT behavior
 - Especially important early
 
