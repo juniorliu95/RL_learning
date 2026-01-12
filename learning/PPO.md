@@ -1,6 +1,4 @@
-# RL
-
-## PPO
+# PPO
 
 Mapping PPO concepts to LLMs:
 
@@ -27,7 +25,7 @@ A trajectory is an ordered sequence produced by interacting with the environment
 
 $$\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots, s_T)$$
 
-### principles
+## principles
 
 **policy**
 $$J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \left[ \sum_{t=0}^{T} \gamma^t r_t \right]$$
@@ -79,7 +77,7 @@ Where:
 
 ---
 
-### 6. PPO’s unclipped objective (what we would like)
+## 6. PPO's unclipped objective (what we would like)
 $L_{PG}(\theta) = \mathbb{E}\left[ r_t(\theta) \cdot A_t \right]$
 
 But this allows:
@@ -89,7 +87,7 @@ But this allows:
 
 ---
 
-### 7. PPO’s clipped surrogate objective
+## 7. PPO's clipped surrogate objective
 
 This is PPO.
 $L_{CLIP}(\theta) = \mathbb{E}\left[\min \left( r_t(\theta)A_t,\ \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)A_t \right)\right]$
@@ -111,7 +109,7 @@ $L_{CLIP}(\theta) = \mathbb{E}\left[\min \left( r_t(\theta)A_t,\ \text{clip}(r_t
   $
 
 
-### 8. Value function loss (critic)
+## 8. Value function loss (critic)
 
 We also train a value function:
 $$L_V(\theta) = \mathbb{E} \left[ \left( V_\theta(s_t) - R_t \right)^2 \right]$$
@@ -125,7 +123,7 @@ we want to train the critic model to represent the expected future reward, so tr
 
 ---
 
-### 9. Entropy bonus (exploration)
+## 9. Entropy bonus (exploration)
 
 Encourages exploration:
 $$L_{ENT}(\theta) = \mathbb{E}\left[ H(\pi_\theta(\cdot \mid s_t)) \right]$$
@@ -136,7 +134,7 @@ $$L_{ENT}(\theta) = \mathbb{E}\left[ H(\pi_\theta(\cdot \mid s_t)) \right]$$
 
 ---
 
-### 10. Final PPO objective
+## 10. Final PPO objective
 
 These terms are combined in the final PPO objective (the one we maximize):
 $$L_{PPO}(\theta) = L_{CLIP}(\theta) - c_1 L_V(\theta) + c_2 L_{ENT}(\theta)$$
@@ -146,9 +144,9 @@ Where:
 - $c_1$: value loss coefficient
 - $c_2$: entropy coefficient
 
-## PPO training
+# PPO training
 
-## 1. The Full PPO Pipeline (Bird’s-Eye View)
+# 1. The Full PPO Pipeline (Bird's-Eye View)
 
 In LLM post-training, PPO is not a single training run. It is the final stage of a multi-stage pipeline:
 
@@ -161,9 +159,9 @@ Each stage initializes the next.
 
 ---
 
-## 2. Initialization (This Is Critical)
+# 2. Initialization (This Is Critical)
 
-### 2.1 Policy (LLM) Initialization
+## 2.1 Policy (LLM) Initialization
 
 - The PPO policy model is initialized from an SFT checkpoint.
 
@@ -178,7 +176,7 @@ $$\pi_{\theta_0} = \pi_{\mathrm{SFT}}$$
 
 ---
 
-### 2.2 Reference Model Initialization
+## 2.2 Reference Model Initialization
 
 - A frozen copy of the SFT model is created:
 
@@ -194,7 +192,7 @@ $$\pi_\text{ref} = \mathrm{stop\_grad}(\pi_\text{SFT})$$
 
 ---
 
-### 2.3 Critic (Value Model) Initialization
+## 2.3 Critic (Value Model) Initialization
 
 Two common strategies:
 
@@ -215,7 +213,7 @@ Two common strategies:
 
 ---
 
-### 2.4 Reward Model Initialization
+## 2.4 Reward Model Initialization
 
 - The reward model is trained before PPO, then frozen.
 - Trained using preference data:  
@@ -230,7 +228,7 @@ After training:
 
 ---
 
-## 3. Warm-Up Phase
+# 3. Warm-Up Phase
 *(Often skipped in theory, essential in practice)*
 
 At the beginning of PPO:
@@ -251,11 +249,11 @@ In VERL, this is handled via conservative defaults and gradual rollout accumulat
 
 ---
 
-## 4. PPO Training Loop (What Happens Every Iteration)
+# 4. PPO Training Loop (What Happens Every Iteration)
 
 Each PPO iteration has four phases:
 
-### 4.1 Rollout Phase (Data Collection)
+## 4.1 Rollout Phase (Data Collection)
 - Sample trajectories using current policy
 
   - *PPO:* 1 sample per prompt
@@ -269,7 +267,7 @@ Each PPO iteration has four phases:
 
 ---
 
-### 4.2 Reward Computation
+## 4.2 Reward Computation
 - Pass completed outputs to reward model
 - Get scalar reward \( r \)
 - Assign reward to final token (LLM case)
@@ -278,7 +276,7 @@ Each PPO iteration has four phases:
 
 ---
 
-### 4.3 Advantage & Return Computation
+## 4.3 Advantage & Return Computation
 
 - Compute TD errors
 - Use GAE (Generalized Advantage Estimation)
@@ -290,7 +288,7 @@ Each PPO iteration has four phases:
 
 ---
 
-### 4.4 Optimization Phase (Where Stability Matters)
+## 4.4 Optimization Phase (Where Stability Matters)
 
 - **Policy update:**
   - PPO clipped objective
@@ -307,11 +305,11 @@ Each PPO iteration has four phases:
 
 ---
 
-## 5. How Stability Is Enforced (“Safety Rails”)
+# 5. How Stability Is Enforced ("Safety Rails")
 
 PPO stability comes from multiple independent constraints:
 
-### 5.1 PPO Clipping
+## 5.1 PPO Clipping
 
 - Limits:
   $$\frac{\pi_\text{new}}{\pi_\text{old}} \in [1 - \epsilon, 1 + \epsilon]$$
@@ -319,7 +317,7 @@ PPO stability comes from multiple independent constraints:
 
 ---
 
-### 5.2 KL Penalty vs Reference Model
+## 5.2 KL Penalty vs Reference Model
 
 - $$L_{\text{KL}} = \beta \cdot \mathrm{KL}(\pi_\theta \parallel \pi_\text{ref})$$
 - Prevents drift away from SFT behavior
@@ -327,7 +325,7 @@ PPO stability comes from multiple independent constraints:
 
 ---
 
-### 5.3 Value Loss Coefficient
+## 5.3 Value Loss Coefficient
 
 - Controls how fast the critic learns.  
   - Too high: critic dominates  
@@ -335,7 +333,7 @@ PPO stability comes from multiple independent constraints:
 
 ---
 
-### 5.4 Advantage Normalization
+## 5.4 Advantage Normalization
 
 - Normalize advantages to mean 0, std 1
 - Stabilizes gradients
@@ -343,13 +341,13 @@ PPO stability comes from multiple independent constraints:
 
 ---
 
-### 5.5 Gradient Clipping
+## 5.5 Gradient Clipping
 
 - Limits gradient norm
 
 ---
 
-## 6. How the Critic “Learns to Work”
+# 6. How the Critic "Learns to Work"
 
 **Early:**  
 - Predictions bad  
@@ -368,7 +366,7 @@ better critic → better policy updates → better data → better critic
 
 ---
 
-## 7. How the Reward Model “Learns to Work”
+# 7. How the Reward Model "Learns to Work"
 
 > **Important:**  
 > The reward model does **NOT** learn during PPO.
@@ -385,7 +383,7 @@ If it is bad:
 
 ---
 
-## 8. GRPO Contrast (To Highlight What PPO Adds)
+# 8. GRPO Contrast (To Highlight What PPO Adds)
 
 | Aspect               | PPO      | GRPO     |
 |----------------------|----------|----------|
@@ -402,7 +400,7 @@ If it is bad:
 
 ---
 
-## 9. How VERL Assumes This Pipeline
+# 9. How VERL Assumes This Pipeline
 
 VERL does **not** train:
 - SFT
@@ -417,7 +415,7 @@ VERL implements:
 
 ---
 
-## 10. One Mental Picture (Keep This)
+# 10. One Mental Picture (Keep This)
 
 PPO is a carefully staged system:
 - Start from a good language model,
